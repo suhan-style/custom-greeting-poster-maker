@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="ar">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- favicon -->
+        <link rel="icon" href="favicon.png" sizes="16x16" type="image/png">
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+		<!-- font awesome link -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&family=Lobster&family=Poppins:wght@300;400;600&family=Satisfy&display=swap" rel="stylesheet">
+
+		<title>Poster Maker - Html2Canvas</title>
+		
+		<style>
+		    @font-face {
+              font-family: 'LT-Bukra';
+              src: url('fonts/LTBukra-Medium.eot') format('embedded-opentype');
+              src: url('fonts/LTBukra-Medium.eot?#iefix') format('embedded-opentype'),
+				    url('fonts/LTBukra-Medium.woff2') format('woff2'),
+				    url('fonts/LTBukra-Medium.woff') format('woff'),
+				    url('fonts/LTBukra-Medium.otf') format('otf'),
+				    url('fonts/LTBukra-Medium.ttf' ) format('truetype'), 
+				    url('fonts/LTBukra-Medium.svg#LTBukra-Medium') format('svg');
+              font-weight:	normal;
+              font-style:	normal;
+            }
+            body {
+                font-family: 'LT-Bukra';
+            }
+            a, a:hover, .btn:hover {
+            	text-decoration: none;
+            }
+            .btn.focus, .btn:focus, :focus-visible {
+                box-shadow: none;
+                outline: 0;
+            }
+            .poster-ratio {
+            	display: flex;
+            	flex-wrap: wrap;
+    			gap: 20px;
+            }
+            .poster-ratio .ratio {
+			    border: 2px dashed grey;
+			    font-size: 14px;
+			    color: #b6b6b6;
+			    text-align: center;
+			    width: 70px;
+			    padding: 20px 0px;
+			}
+			.poster-ratio .ratio.active {
+				border-color: red;
+				color: red;
+			}
+            .poster-border-thumb {
+            	display: flex;
+    			gap: 20px;
+            }
+            .frame-border {
+            	width: 100px;
+            	height: 100px;
+            }
+            #grey_border { border: 15px solid #808080; }
+            #red_border { border: 15px solid #aa0000; }
+            #blue_border { border: 15px solid #042886; }
+
+            #preview_wrapper {
+            	position: relative;
+            	border: 15px solid #f4f1f1;
+            	overflow: hidden;
+            }
+            #posterFooter {
+			    background: black;
+			    padding: 20px;
+			    color: #fff;
+			    position: relative;
+			    bottom: 0;
+			    left: 0;
+			    width: 100%;
+			}
+			#innerImg {
+				width: 100%;
+			    height: 300px;
+			    background-image: url(undefined.jpg);
+			    background-repeat: no-repeat;
+			    background-size: cover;
+			    background-position: center;
+			}
+            /*#innerImg > img {
+            	width: 100%;
+			    height: 100%;
+			    object-fit: cover;
+            }*/
+            #innerText {
+            	margin: 20px;
+            	height: 35%;
+            	overflow: hidden;
+            }
+            #imgPreview {
+			  	display: none; 
+			  	width: 155px;   
+			  	border: 2px dashed #333;  
+			  	margin-bottom: 20px;
+			}
+			#imgPreview img {  
+			  	width: 100%;
+			  	height: auto; 
+			  	display: block;   
+			}
+		</style>
+	</head>
+	<body>
+	    <div class="container-fluid">
+	        <div class="row py-md-5 px-md-5">
+	            <div class="col-12 col-md-5 py-5">
+	                <label>Create Your Poster Card</label>
+
+	                <div class="accordion" id="accordionExample">
+	                	<div class="card">
+	                		<div class="card-header" id="posterRatio">
+	                			<h5 class="mb-0">
+	                				<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapsePosterRatio" aria-expanded="true" aria-controls="collapsePosterRatio">
+	                					Select poster ratio
+	                				</button>
+	                			</h5>
+	                		</div>
+
+	                		<div id="collapsePosterRatio" class="collapse show" aria-labelledby="posterRatio" data-parent="#accordionExample">
+	                			<div class="card-body">
+	                				<div class="poster-ratio">
+	                					<a href="javascript:void(0)" id="ratio_auto" class="ratio active">auto</a>
+	                					<a href="javascript:void(0)" id="ratio_1-1" class="ratio">1:1</a>
+	                					<a href="javascript:void(0)" id="ratio_4-5" class="ratio">4:5</a>
+	                					<a href="javascript:void(0)" id="ratio_9-16" class="ratio">9:16</a>
+	                					<a href="javascript:void(0)" id="ratio_16-9" class="ratio">16:9</a>
+	                				</div>
+	                			</div>
+	                		</div>
+	                	</div>
+
+	                	<div class="card">
+	                		<div class="card-header" id="headingOne">
+	                			<h5 class="mb-0">
+	                				<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+	                					Select poster frame
+	                				</button>
+	                			</h5>
+	                		</div>
+
+	                		<div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+	                			<div class="card-body">
+	                				<div class="poster-border-thumb">
+	                					<a href="javascript:void(0)" id="grey_border" class="frame-border"></a>
+	                					<a href="javascript:void(0)" id="red_border" class="frame-border"></a>
+	                					<a href="javascript:void(0)" id="blue_border" class="frame-border"></a>
+	                				</div>
+	                			</div>
+	                		</div>
+	                	</div>
+
+	                	<div class="card">
+	                		<div class="card-header" id="headingTwo">
+	                			<h5 class="mb-0">
+	                				<button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+	                					Upload Image
+	                				</button>
+	                			</h5>
+	                		</div>
+	                		<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+	                			<div class="card-body">
+	                				<div id="imgPreview"></div>
+	                				<input type="file" class="form-control mt-3" id="chooseFile" accept="image/*" required>
+		            				<button class="btn btn-success mt-4 mr-3" id="addImgBtn">Add Image</button>
+	                			</div>
+	                		</div>
+	                	</div>
+
+	                	<div class="card">
+	                		<div class="card-header" id="headingThree">
+	                			<h5 class="mb-0">
+	                				<button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+	                					Add text message
+	                				</button>
+	                			</h5>
+	                		</div>
+	                		<div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+	                			<div class="card-body">
+	                				<input type="text" name="title" id="title" class="form-control mt-3" placeholder="Title">
+	                				<textarea class="form-control mt-3" id="source_text" placeholder="Message" required></textarea>
+		            				<button class="btn btn-success mt-4 mr-3" id="addBtn">Add</button>
+	                			</div>
+	                		</div>
+	                	</div>
+
+	                	<div class="card">
+	                		<div class="card-header" id="headingFour">
+	                			<h5 class="mb-0">
+	                				<button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+	                					Advanced Style
+	                				</button>
+	                			</h5>
+	                		</div>
+	                		<div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+	                			<div class="card-body">
+	                				<div class="mb-5">
+	                					<!-- image height style -->
+	                					<div class="mb-3">
+			                				<label for="customRange1" class="form-label">Image Height in (px) </label>
+			                				<input type="number" id="imgHeight" name="imgHeight" min="0" max="100" value="">
+				            			</div>
+
+				            			<!-- image view position -->
+				                		<div class="mb-3">
+				            				<label for="imgPosition" class="form-label">Image View Position </label>
+			                				<select id="imgPosition">
+			                					<option></option>
+			                					<option value="top">Top</option>
+			                					<option value="bottom">Bottom</option>
+			                					<option value="left">Left</option>
+			                					<option value="right">Right</option>
+			                					<option value="center">Center</option>
+			                				</select>
+			                			</div>
+
+			                			<button class="btn btn-small btn-success ml-3" id="imgStyleBtn">Add</button>
+			            			</div>
+
+			            			<hr />
+
+			            			<!-- title font style -->
+			            			<div class="my-5">
+			            				<!-- title font family -->
+			                			<div class="mb-3">
+				            				<label for="titleFontFamily" class="form-label">Title Font Family </label>
+			                				<select id="titleFontFamily">
+			                					<option value="LT-Bukra">Default</option>
+			                					<option value="Josefin Sans">Josefin Sans</option>
+			                					<option value="Lobster">Lobster</option>
+			                					<option value="Poppins">Poppins</option>
+			                					<option value="Satisfy">Satisfy</option>
+			                				</select>
+			                			</div>
+
+			            				<!-- title font size -->
+			            				<div class="mb-3">
+					            			<label for="titleFontSize" class="form-label">Title Font Size (px) </label>
+				                			<input type="number" id="titleFontSize" name="titleFontSize" value="">
+				                		</div>
+
+				                		<!-- title font weight -->
+				                		<div class="mb-3">
+				            				<label for="titleFontWeight" class="form-label">Title Font Weight </label>
+			                				<select id="titleFontWeight">
+			                					<option></option>
+			                					<option value="300">Light</option>
+			                					<option value="400">Regular</option>
+			                					<option value="600">Bold</option>
+			                				</select>
+			                			</div>
+			                			<button class="btn btn-small btn-success ml-3" id="titleStyleBtn">Add</button>
+				            		</div>
+
+				            		<hr />
+
+
+				            		<!-- description font style -->
+			            			<div class="my-5">
+			            				<!-- description font family -->
+			                			<div class="mb-3">
+				            				<label for="descFontFamily" class="form-label">Desc. Font Family </label>
+			                				<select id="descFontFamily">
+			                					<option value="LT-Bukra">Default</option>
+			                					<option value="Josefin Sans">Josefin Sans</option>
+			                					<option value="Lobster">Lobster</option>
+			                					<option value="Poppins">Poppins</option>
+			                					<option value="Satisfy">Satisfy</option>
+			                				</select>
+			                			</div>
+
+			            				<!-- description font size -->
+			            				<div class="mb-3">
+					            			<label for="descFontSize" class="form-label">Desc. Font Size (px) </label>
+				                			<input type="number" id="descFontSize" name="descFontSize" value="">
+				                		</div>
+
+				                		<!-- description font weight -->
+				                		<div class="mb-3">
+				            				<label for="descFontWeight" class="form-label">Desc. Font Weight </label>
+			                				<select id="descFontWeight">
+			                					<option></option>
+			                					<option value="300">Light</option>
+			                					<option value="400">Regular</option>
+			                					<option value="600">Bold</option>
+			                				</select>
+			                			</div>
+			                			<button class="btn btn-small btn-success ml-3" id="descStyleBtn">Add</button>
+				            		</div>
+	                			</div>
+	                		</div>
+	                	</div>
+	                </div>
+
+		            <div>
+		            	<button type="button" id="downloadBtn" class="btn mt-4">Download Poster</button>
+		            	<button id="shareBtn" class="btn btn-primary mt-4" data-toggle="modal" data-target="#exampleModal">Share Poster</button>
+		            </div>
+		            <!-- Modal -->
+					<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					  <div class="modal-dialog modal-lg">
+					    <div class="modal-content">
+					      <div class="modal-header">
+					        <h5 class="modal-title" id="exampleModalLabel">Share Post</h5>
+					        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					          <span aria-hidden="true">&times;</span>
+					        </button>
+					      </div>
+					      <div class="modal-body">
+					        <div id="finalPoster"></div>
+					      </div>
+					      <div class="modal-footer justify-content-between">
+					      	<!-- Your share button code -->
+							<div class="fb-share-button" data-href="https://www.your-domain.com/your-page.html" data-layout="button_count">
+							</div>
+					      	<div>
+					      		<a href="" target="_blank" class="mr-3"><i class="fa-brands fa-square-facebook fa-2x"></i></a>
+					      		<a href="" target="_blank"><i class="fa-brands fa-instagram fa-2x"></i></a>
+					      	</div>
+					        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+	            </div>
+	            <div class="col-12 col-md-7">
+	            	<div id="preview_wrapper">
+	            		<div id="innerImg">
+	            			<!-- <img src="" alt="thumb-img" onerror=this.src="undefined.jpg" class="img-fluid" /> -->
+	            		</div>
+
+	            		<div id="innerText">
+	            			<h3 id="posterTitle" class="mb-4">Title: (Optional)</h3>
+	            			<p id="desc">
+	            				Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+	            			</p>
+	            		</div>
+
+	            		<div id="posterFooter">
+	            			<p class="mb-0">Footer Content</p>
+	            		</div>
+	            	</div>
+	            </div>
+	        </div>
+	    </div>
+
+
+		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+		<script>
+			jQuery(function($) {
+				// select poster ratio
+				$('.ratio').click(function() {
+					$('.ratio').removeClass('active');
+					$(this).addClass('active');
+				});
+				$('#ratio_auto').click(function() {
+					$('#preview_wrapper').css('aspect-ratio','auto');
+					$('#posterFooter').css('position','relative');
+				});
+				$('#ratio_1-1').click(function() {
+					$('#preview_wrapper').css('aspect-ratio','1 / 1');
+					$('#posterFooter').css('position','absolute');
+				});
+				$('#ratio_4-5').click(function() {
+					$('#preview_wrapper').css('aspect-ratio','4 / 5');
+					$('#posterFooter').css('position','absolute');
+				});
+				$('#ratio_9-16').click(function() {
+					$('#preview_wrapper').css('aspect-ratio','9 / 16');
+					$('#posterFooter').css('position','absolute');
+				});
+				$('#ratio_16-9').click(function() {
+					$('#preview_wrapper').css('aspect-ratio','16 / 9');
+				});
+
+
+				// select poster frame
+				$('#grey_border').click(function() {
+					$('#preview_wrapper').css('border-color','#808080');
+				});
+				$('#red_border').click(function() {
+					$('#preview_wrapper').css('border-color','#aa0000');
+				});
+				$('#blue_border').click(function() {
+					$('#preview_wrapper').css('border-color','#042886');
+				});
+
+
+				// Advanced Style - Image Height Button
+				$('#imgStyleBtn').click(function() {
+					const imgHeight = $('#imgHeight').val();
+					// console.log(imgHeight + 'px');
+					$('#innerImg').css('height', imgHeight + 'px');
+
+					const imgPosition = $('#imgPosition').val();
+					$('#innerImg').css('background-position', imgPosition);
+				});
+
+				// Advanced Style - Title Font Style Button
+				$('#titleStyleBtn').click(function() {
+					const titleFontSize = $('#titleFontSize').val();
+					// console.log(titleFontSize + 'px');
+					$('#posterTitle').css('fontSize', titleFontSize + 'px');
+
+					const titleFontWeight = $('#titleFontWeight').val();
+					console.log(titleFontWeight);
+					$('#posterTitle').css('font-weight', titleFontWeight);
+
+					const titleFontFamily = $('#titleFontFamily').val();
+					// console.log(titleFontFamily);
+					$('#posterTitle').css('font-family', titleFontFamily);
+				});
+
+				// Advanced Style - Description Font Style Button
+				$('#descStyleBtn').click(function() {
+					const descFontSize = $('#descFontSize').val();
+					// console.log(descFontSize + 'px');
+					$('#desc').css('fontSize', descFontSize + 'px');
+
+					const descFontWeight = $('#descFontWeight').val();
+					console.log(descFontWeight);
+					$('#desc').css('font-weight', descFontWeight);
+
+					const descFontFamily = $('#descFontFamily').val();
+					// console.log(descFontFamily);
+					$('#desc').css('font-family', descFontFamily);
+				});
+
+
+				/********************************************
+				  Calculate height of poster, image & footer
+				  Assign height to innerText dynamically
+				*********************************************/
+				// const posterHeight = $('#preview_wrapper').outerHeight();
+				// console.log(posterHeight);
+
+				// const imgHeight = $('#innerImg').outerHeight();
+				// console.log(imgHeight);
+
+				// const footerHeight = $('#posterFooter').outerHeight();
+				// console.log(footerHeight);
+
+				// const textHeight = $('#innerText').outerHeight();
+				// $('#innerText').css({
+				// 	'min-height' : imgHeight + footerHeight,
+				// 	'max-height' : posterHeight - (imgHeight + footerHeight)
+				// });
+
+
+				const chooseFile = document.getElementById("chooseFile");
+				const imgPreview = document.getElementById("imgPreview");
+
+				chooseFile.addEventListener("change", function () {
+					getImgData();
+				});
+
+				function getImgData() {
+					const files = chooseFile.files[0];
+					if (files) {
+						const fileReader = new FileReader();
+						fileReader.readAsDataURL(files);
+						fileReader.addEventListener("load", function () {
+							imgPreview.style.display = "block";
+							imgPreview.innerHTML = '<img src="' + this.result + '" />';
+						});
+					}
+				}
+
+				// add image to poster frame
+				$('#addImgBtn').click(function() {
+					const innerImg = $('#imgPreview img').attr('src');
+					$('#innerImg').css('background-image', 'url('+innerImg+')');
+				});
+
+
+				// add text message to poster frame
+				$('#addBtn').click(function() {
+					const title = $('#title').val();
+					$('#innerText h3').html(title);
+
+					const textMsg = $('#source_text').val();
+					$('#innerText p').html(textMsg);
+
+					$('#downloadBtn').removeClass('disabled');
+					// $('#downloadBtn').attr('onclick','doCapture()');
+				});	
+				
+				$('#downloadBtn').attr('onclick','doCapture()');
+
+				$('#shareBtn').attr('onclick','posterInModal()');
+			});
+		</script>
+
+		<script src="html2canvas.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<script>
+			function doCapture() {
+				html2canvas(document.getElementById('preview_wrapper')).then( function(canvas) {
+					// console.log(canvas.toDataURL('image/jpeg', 0.9));
+					const imgurl = canvas.toDataURL('image/jpeg', 1);
+    				saveAs(imgurl, 'poster');
+				});
+			}
+
+			function posterInModal() {
+				html2canvas(document.getElementById('preview_wrapper')).then( function(canvas) {
+					// console.log(canvas.toDataURL('image/jpeg', 0.9));
+					const imgurl = canvas.toDataURL('image/jpeg', 1);
+    				const finalPoster = document.getElementById('finalPoster');
+    				finalPoster.innerHTML = "<img src='"+imgurl+"' alt='finalPoster'>";
+				});
+			}
+		</script>
+	</body>
+</html>
